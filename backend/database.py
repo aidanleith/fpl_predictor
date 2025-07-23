@@ -7,7 +7,6 @@ from ml.dataCollection.collector import dataCollector
 #important cursor/connection functions: connection.commit(), cursor.execute(sql, params_list), cursor.fetchone(), 
 #cursor.fetchmany(), cursor.fetchall()
 
-
 class databaseManager:
 
     def __init__(self):

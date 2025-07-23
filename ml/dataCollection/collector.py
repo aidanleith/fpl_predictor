@@ -1,6 +1,7 @@
 #Collector.py retrieves data from a specified url and returns a dataframe representing that data.
 from ml.dataCollection.config import FPLConfig
 import pandas as pd
+import requests
 
 class dataCollector:
 
@@ -27,9 +28,51 @@ class dataCollector:
     
     #data on each player for each gameweek
     def gameweekMerged(self, season):
+
         url = self.configs.dataSource.getGameweekMergedUrl(season)
-        df = pd.read_csv(url, on_bad_lines = 'warn')
-        return df
+    
+        #find where line formatting changes
+        formatChange = self._find_format_change_line(url)
+        
+        if formatChange is None:
+            #return normally
+            df = pd.read_csv(url)
+            return df
+        
+        print(f"Format change at line {formatChange}")
+        
+        #read first part
+        df1 = pd.read_csv(url, nrows=formatChange-1)
+        print(f"First part: {len(df1)} rows, {len(df1.columns)} columns")
+
+        desired_column_indices = list(range(21)) + list(range(28, 49))
+        
+        #read second part
+        try:
+            df2 = pd.read_csv(url, skiprows=formatChange, names=df1.columns, usecols=desired_column_indices)
+            print(f"Second part: {len(df2)} rows, {len(df2.columns)} columns")
+        except Exception as e:
+            print(f"Error occurred: {e}")
+        
+        return df1, df2
+    
+    #find the line number where CSV format changes
+    def _find_format_change_line(self, url):
+        response = requests.get(url)
+        lines = response.text.split('\n')
+        
+        if not lines:
+            return None
+            
+        header_cols = len(lines[0].split(','))
+        
+        for i, line in enumerate(lines[1:], 1):
+            if line.strip():
+                cols = len(line.split(','))
+                if cols != header_cols:
+                    return i
+        
+        return None
 
     #seasonal team data
     def teamData(self, season):
