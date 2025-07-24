@@ -10,3 +10,6 @@ venv/
 
 #vscode settings
 .vscode/
+
+#To do list
+.nextSteps.txt

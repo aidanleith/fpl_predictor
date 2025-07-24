@@ -54,7 +54,7 @@ class dataCollector:
         except Exception as e:
             print(f"Error occurred: {e}")
         
-        return df1, df2
+        return pd.concat([df1,df2], ignore_index=True)
     
     #find the line number where CSV format changes
     def _find_format_change_line(self, url):

@@ -1,81 +1,44 @@
-import sys
-sys.path.append('../..')
-
-from ml.dataCollection.collector import dataCollector
-from ml.dataCollection.config import dataSourceConfig
 import pandas as pd
 import numpy as np
 import requests
 
+'''
+Class utilized by preprocessing pipeline to perform basic data cleaning such as dropping immediately irrelevant columns and sorting
+df based on id first then gameweek. Will ensure that the final df is comprised of one players stats for the season in ascending order.
+'''
+
 class cleanData:
 
     def __init__(self):
-        self.collector = dataCollector()
-        self.configs = dataSourceConfig()
-    
-    #removes features not relevant to the model, handles missing values, 
-    def clean(self):
+        pass
 
-        #list of positions
-        positions = ["GK", "DEF", "MID", "FWD"]
+    #removes features not relevant to the model, sorts
+    def cleanAndSort(self, df):
+        df = self.drop(df)
+        df = self.sort(df)
+        return df
 
-        #combine dataframes and clean
-        firstDf, secondDf = self.collector.gameweekMerged("2024-25")
-        df = self.combine(firstDf, secondDf)
-        self.drop(df)
-
-        for pos in positions:
-            posDf = firstDf[firstDf['position'] == pos]
-
-            if pos == "GK":
-                size = posDf.size
-                print(posDf.iloc[0:82])
-            elif pos == "DEF":
-                continue
-            elif pos == "MID":
-                continue
-            else:
-                continue
-        return True
-
-    #combine two dataframes 
-    def combine(self, df1, df2):
-        #concat since the two dfs have same columns, ignore indices so they dont reset from 0 at second df
-        #use join when u want to combine two dfs side by side
-        #merge for finding all matches on a specified column/row name, then adding all found data for that match into one row
-        res = pd.concat([df1,df2], ignore_index=True)
-
-        return res
-    
+    #drop unnecessary features from df
     def drop(self, df):
+        try:
+            toDrop = [
+                "fixture", "ict_index", "kickoff_time", "team_a_score", "team_h_score", "modified"
+            ]
+            df.drop(columns=toDrop)
+            return df
         
-        return True
+        except Exception as e:
+            print(f"Exception occured dropping columns: {e}")
     
-    def debug_problematic_lines(self, season):
-        url = self.configs.getGameweekMergedUrl(season)
-        response = requests.get(url)
-        lines = response.text.split('\n')
-        
-        header_cols = len(lines[0].split(','))
-        problematic_lines = []
-        
-        for i, line in enumerate(lines[1:], 1): 
-            if line.strip(): 
-                cols = len(line.split(','))
-                if cols != header_cols:
-                    problematic_lines.append((i, cols, line[:200])) 
-                    if len(problematic_lines) < 5: 
-                        print(f"Line {i}: {cols} fields")
-                        print(f"Content: {line[:200]}...")
-                        print("---")
-        
-        print(f"Found {len(problematic_lines)} problematic lines out of {len(lines)-1} total")
-        return problematic_lines
-    
-        
+    #sort df by player id then gameweek in ascending order to have each player together in ascending gameweeks
+    def sort(self, df):
+        try:
+            df.sort_values(by=["element", "GW"])
+            return df
+        except Exception as e:
+            print(f"Exception occured sorting df by players: {e}")
 
-d = cleanData()
-d.clean()
+    
 
 
 
