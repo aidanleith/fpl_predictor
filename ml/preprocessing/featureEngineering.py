@@ -126,6 +126,7 @@ class featureEngineer:
         for col in positionSpecific:
             colsToKeep.append(col)
 
-        x = df[colsToKeep]
-        y = df["total_points"]
+        #drop first row as will have majority null values in x, make sure y corresponds
+        x = df[colsToKeep].dropna()
+        y = df.loc[x.index, "total_points"]
         return x, y

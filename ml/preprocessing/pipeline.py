@@ -32,11 +32,25 @@ class MLPipeline:
         x, y = self.engineer.finalDf(dfEngineered)
 
         print(x.columns)
+        print(x.iloc[0:38, 10:20])
+        print(y)
+
+    #splits the dataframe into training (80%) and testing (20%)
+    def split(self, df):
+        split = 0.2
+        splitIndex = int(len(df) * (1-split))
+
+        xTrain = df.iloc[:splitIndex]
+        yTrain = df.iloc[:splitIndex]
+        xTest = df.iloc[splitIndex:]
+        yTest = df.iloc[splitIndex:]
+
+        return xTrain, yTrain, xTest, yTest
 
 
-p = MLPipeline("GK", "2024-25")
+p = MLPipeline("FWD", "2024-25")
 df = p.retrieveData("2024-25")
-df = df[df["element"] == 344]
+df = df[df["element"] == 4]
 p.preprocessData(df)
 
     
