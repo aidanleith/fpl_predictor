@@ -1,159 +1,18 @@
 import urllib.parse
-from ml.dataCollection.config import databaseConfig
-import mysql.connector
 from mysql.connector import Error
 from ml.dataCollection.collector import dataCollector
+from ml.preprocessing.featureEngineering import featureEngineer
 
 #important cursor/connection functions: connection.commit(), cursor.execute(sql, params_list), cursor.fetchone(), 
 #cursor.fetchmany(), cursor.fetchall()
 
-class databaseManager:
+class insertPastData:
 
-    def __init__(self):
-        self.config = databaseConfig()
+    def __init__(self, dbConnection):
         self.collect = dataCollector()
-        self.connection = None
-        self.cursor = None
-    
-    def connect(self) -> bool:
-        try:
-            self.connection = mysql.connector.connect(
-                user = self.config.username,
-                password = self.config.password,
-                database = self.config.database,
-                host = self.config.host,
-                port = self.config.port
-            )
-
-            if self.connection.is_connected():
-                self.cursor = self.connection.cursor()
-            return True
-
-        except Error as e:
-            return False
-        
-    def disconnect(self) -> bool:
-        try:
-            if self.cursor is not None:
-                self.cursor.close()
-            if self.connection is not None and self.connection.is_connected:
-                self.connection.close()
-            return True
-        
-        except Error as e:
-            return False
-        
-    def createTables(self) -> bool:
-        try:
-
-            players = """
-            CREATE TABLE IF NOT EXISTS players (
-                id INT,
-                season VARCHAR(20),
-                first_name VARCHAR(50),
-                last_name VARCHAR(50),
-                PRIMARY KEY (id, season)
-            )
-            """
-
-            #create table for storing team data at the end of a season
-            teamSql = """
-            CREATE TABLE IF NOT EXISTS teams (
-                team_id INT,
-                season VARCHAR(20),
-                team_name VARCHAR(50),
-                team_pos_final INT,
-                strength INT,
-                strength_overall_home INT,
-                strength_overall_away INT,
-                strength_attack_home INT,
-                strength_attack_away INT,
-                strength_defense_home INT,
-                strength_defense_away INT,
-                PRIMARY KEY (team_id, season)
-            )
-            """
-
-            #create table for storing individual player data for a season
-            endOfSeason = """
-            CREATE TABLE IF NOT EXISTS endOfSeason (
-                player_id INT,
-                first_name VARCHAR(100) NOT NULL,
-                second_name VARCHAR(100) NOT NULL,
-                position VARCHAR(10),
-                season VARCHAR(20),
-                total_points INT,
-                goals_scored INT,
-                assists INT,
-                clean_sheets INT,
-                goals_conceded INT,
-                yellow_cards INT,
-                red_cards INT,
-                bonus INT,
-                bps INT,
-                influence DECIMAL(10,2),
-                creativity DECIMAL(10,2),
-                threat DECIMAL(10,2),
-                ict_index DECIMAL(10,2),
-                cost DECIMAL(10,2),
-                selected_by_percent DECIMAL(10,2),
-                PRIMARY KEY (player_id, season),
-                FOREIGN KEY (player_id, season) REFERENCES players(id, season)
-            )
-            """
-
-            #this table stores every players stats for all gameweeks
-            gameweekData = """
-            CREATE TABLE IF NOT EXISTS gameweekStats (
-                player_id INT,
-                season VARCHAR(20),
-                gameweek INT,
-                opponent_team VARCHAR(50),
-                was_home BOOLEAN,
-                round_points INT,
-                expected_assists DECIMAL(10,2),
-                expected_goal_involvements DECIMAL(10,2),
-                expected_goals DECIMAL(10,2),
-                expected_goals_conceded DECIMAL(10,2),
-                starts INT,
-                transfers_in INT,
-                transfers_out INT,
-                minutes INT,
-                goals_scored INT,
-                assists INT,
-                clean_sheets INT,
-                goals_conceded INT,
-                own_goals INT,
-                penalties_saved INT,
-                penalties_missed INT,
-                yellow_cards INT,
-                red_cards INT,
-                saves INT,
-                bonus INT,
-                bps INT,
-                influence DECIMAL(10,2),
-                creativity DECIMAL(10,2),
-                threat DECIMAL(10,2),
-                ict_index DECIMAL(10,2),
-                value DECIMAL(10,2),
-                selected INT,
-                PRIMARY KEY (player_id, gameweek, season),
-                FOREIGN KEY (player_id, season) REFERENCES players(id, season)
-            )
-            """
-
-            #execute commands and commit to database
-            self.cursor.execute(players)
-            self.cursor.execute(teamSql)
-            self.cursor.execute(endOfSeason)
-            self.cursor.execute(gameweekData)
-            self.connection.commit()
-            print("Successfully created tables.")
-            return True
-
-        except Error as e:
-            print(f"Error occurred creating tables: {e}")
-            return False
+        self.engineer = featureEngineer(None, None)
+        self.db = dbConnection
+        self.cursor = self.db.getCursor()
     
     #takes df paramater which stores data and season specifying which season, returns true if successfully inserted into table
     def insertTeamsData(self, df, season) -> bool:
@@ -185,7 +44,7 @@ class databaseManager:
 
                 self.cursor.execute(sql, values)
 
-            self.connection.commit()
+            self.db.commit()
             print(f"Inserted teams data for season {season} successfully.")
             return True     
            
@@ -212,7 +71,7 @@ class databaseManager:
 
                 self.cursor.execute(sql, values)
 
-            self.connection.commit()
+            self.db.commit()
             print(f"Players successfully added for season: {season}")
             return True
         
@@ -222,11 +81,17 @@ class databaseManager:
 
     def insertEndOfSeason(self, df, season) -> bool:
         try:
+            
             for i, row in df.iterrows():
 
                 query = "SELECT id FROM players WHERE first_name = %s AND last_name = %s AND season = %s"
                 self.cursor.execute(query, (row.get('first_name', ''), row.get('second_name', ''), season))
                 res = self.cursor.fetchone()
+
+                #avoids unread result found error in cursor due to not consuming all results
+                #caused by duplicate player files returning several results, adding unused to buffer
+                while self.cursor.nextset(): 
+                    pass
 
                 if res is None:
                     print(f"Error finding {row.get('first_name', '')} {row.get('second_name', '')} id")
@@ -235,8 +100,11 @@ class databaseManager:
                 #returns tuple so need to get first item despite there only being one item
                 id = res[0]
                 
+                #requires ignore due to earlier seasons having duplicated player files. hence, when it reads in the first file,
+                #it retrieves id for that name. then it reads the second file, retrieves the same id from the players table, and 
+                #returns duplicated primary key error.
                 sql = """
-                INSERT INTO endOfSeason (
+                INSERT IGNORE INTO endOfSeason (
                 player_id, first_name, second_name, position, season, total_points, goals_scored, assists, clean_sheets,
                 goals_conceded, yellow_cards, red_cards, bonus, bps, influence, creativity, 
                 threat, ict_index, cost, selected_by_percent
@@ -268,9 +136,8 @@ class databaseManager:
                 )
 
                 self.cursor.execute(sql, values)
-                #use tuple as opposed to a list because they are immutable
 
-            self.connection.commit()
+            self.db.commit()
             print(f"Successfully added end of season stats for all players in season: {season}.")
             return True
         
@@ -278,28 +145,32 @@ class databaseManager:
             print(f"Error occurred inserting data to end of season stats: {e}")
             return False
         
-    def insertGameweekData(self, df, season, id) -> bool:
+    def insertGameweekData(self, df, season, id, firstName, secondName) -> bool:
         #note: INSERT IGNORE required as human error caused some duplicate gameweek numbers in github repo.
         #Since there is a composite primary key of season, gameweek, and id, when it tries to insert for the same player
-        #in the same season with a FALSELY same key, there will be an error.
+        #in the same season with a FALSELY same gw, there will be an error.
         #As a result, there will be around a 3-5% loss on data for some players in a season. 
+        #UPDATE ON note ABOVE: created way to retrieve directly from gw merged file and fix repeating gw's in data collector file
+        #and feature engineering file
         try:
             for i, row in df.iterrows():
                 sql = """
-                INSERT IGNORE INTO gameweekStats (
-                    player_id, season, gameweek, opponent_team, was_home, round_points, expected_assists,
+                INSERT INTO gameweekStats (
+                    player_id, first_name, second_name, season, gameweek, opponent_team, was_home, round_points, expected_assists,
                     expected_goal_involvements, expected_goals, expected_goals_conceded, starts, transfers_in, 
                     transfers_out, minutes, goals_scored, assists, clean_sheets, goals_conceded, own_goals,
                     penalties_saved, penalties_missed, yellow_cards, red_cards, saves, bonus, bps, 
                     influence, creativity, threat, ict_index, value, selected
                 ) VALUES(%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s,
-                         %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
+                         %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
                 """
 
                 values = (
                     id,
+                    firstName,
+                    secondName,
                     season,
-                    row.get('round', -1),
+                    row.get('GW', -1),
                     row.get('opponent_team', -50),
                     row.get('was_home', -1),
                     row.get('round_points', -1),
@@ -332,15 +203,15 @@ class databaseManager:
                 )
 
                 self.cursor.execute(sql, values)
-            
-            self.connection.commit()
-            print("Gameweek data successfully added!")
+
+            self.db.commit()
             return True
         
         except Error as e:
             print(f"Error occurred inserting gameweek data for season: {season}, player: {id}, error: {e}")
             return False
         
+    #needed if u want to collect data for all gameweeks on specific player as it creates encoded part need for url with gameweek and names
     def getPlayerGameweek(self, season):
 
         try:
@@ -350,24 +221,26 @@ class databaseManager:
             players = self.cursor.fetchall()
             inserted = 0
 
-            for id, first_name, last_name in players:
+            for id, firstName, lastName in players:
 
                 #players with spaces in names must be encoded to not have url error
-                encoded_first_name = urllib.parse.quote(first_name)
-                encoded_last_name = urllib.parse.quote(last_name)
+                encoded_first_name = urllib.parse.quote(firstName)
+                encoded_last_name = urllib.parse.quote(lastName)
                 urlNameAndId = f"{encoded_first_name}_{encoded_last_name}_{id}"
                 
                 df = self.collect.playerPerformanceGameweek(season, urlNameAndId)
 
+                #now fix repeating gw error
+                df = self.engineer.fixGwRepeats(df)
+
                 try:
-                    if self.insertGameweekData(df, season, id):
+                    if self.insertGameweekData(df, season, id, firstName, lastName):
                         inserted += 1
-                        print(f"Player: {first_name} {last_name} was added.")
                     else:
-                        print(f"Inserted so far: {inserted}. Problem with {first_name} {last_name}")
+                        print(f"Inserted so far: {inserted}. Problem with {firstName} {lastName}")
 
                 except Error as e:
-                    print(f"Failed inserting player {first_name} {last_name} with error: {e}")
+                    print(f"Failed inserting player {firstName} {lastName} with error: {e}")
 
         except Error as e:
             print(f"Failed to either collect df or retrieve players from database with error: {e}")

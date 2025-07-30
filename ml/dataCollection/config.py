@@ -1,7 +1,3 @@
-import os
-from dotenv import load_dotenv
-
-load_dotenv()
 
 #Configs for database, FPL Client, and github repo data collection.
 
@@ -49,19 +45,8 @@ class dataSourceConfig:
     
     def playerIdListUrl(self, season):
         return f"{self.getSeasonUrl(season)}/player_idlist.csv"
-    
-#Database using mySQL
-class databaseConfig:
-
-    def __init__(self):
-        self.host = os.getenv('DB_HOST')
-        self.port = int(os.getenv('DB_PORT'))
-        self.database = os.getenv('DB_DATABASE')
-        self.username = os.getenv('DB_USERNAME')
-        self.password = os.getenv('DB_PASSWORD')
 
 class FPLConfig:
 
     def __init__(self):
-        self.database = databaseConfig()
         self.dataSource = dataSourceConfig()

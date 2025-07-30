@@ -15,6 +15,7 @@ class featureEngineer:
 
     #creates 3 to 5 game rolling averages for features that all players regardless of position gain/lose points from
     def createRollingAverages(self, df):
+        
         rollingCols = ["total_points", "goals_scored", "assists", "minutes",
                        "expected_goals", "expected_goal_involvements", "expected_assists",
                        "yellow_cards", "red_cards", "bonus"]
@@ -38,6 +39,7 @@ class featureEngineer:
     
     #position specific features. note: FWD have no specific feature to gain or lose points from outside of general features
     def createPositionalStats(self, df):
+
         if self.position == "GK":
             newCols = ['saves', 'clean_sheets', 'goals_conceded', 'penalties_saved', 
                        'expected_goals_conceded']
@@ -77,11 +79,13 @@ class featureEngineer:
     
     #encode categorical variables
     def encode(self, df):
+
         df['was_home'] = df['was_home'].astype(int)
         return df
     
     #add opponent team strength for each gameweek from team data csv
     def addOpponentStrength(self, df):
+
         collect = dataCollector()
         teamDf = collect.teamData(self.season)
         df = df.merge(teamDf[['strength', 'id']], left_on='opponent_team', right_on='id', how='left')
@@ -92,6 +96,7 @@ class featureEngineer:
     
     #ensure no gw repeats as there are in csv file
     def fixGwRepeats(self, df):
+
         #create new column which splits df by each player id and counts number of rows
         df['corrected_gameweeks'] = df.groupby('element').cumcount()+1
 
@@ -103,6 +108,7 @@ class featureEngineer:
 
     #returns x,y with x being training features and y being total points in dataframes
     def finalDf(self,df):
+
         colsToKeep = ["was_home", "value", "selected", "transfers_in", "transfers_out",
                       "total_points_last3", "total_points_last5", "goals_scored_last3", 
                       "goals_scored_last5", "assists_last3", "assists_last5", "minutes_last3",

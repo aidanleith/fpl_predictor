@@ -13,12 +13,12 @@ class MLPipeline:
     def __init__(self, position, season):
         self.cleaner = cleanData()
         self.engineer = featureEngineer(position, season)
-        self.collect = dataCollector()
+        #self.collect = dataCollector()
 
     #retrieve raw data on a player for a specific season
-    def retrieveData(self, season):
+    '''def retrieveData(self, season):
         df = self.collect.gameweekMerged(season)
-        return df
+        return df'''
 
     #data cleaning and feature engineering. returns my training features (x) and target values (y)
     def preprocessData(self, df):
@@ -30,28 +30,27 @@ class MLPipeline:
         dfEngineered = self.engineer.addOpponentStrength(dfEngineered)
         dfEngineered = self.engineer.createPositionalStats(dfEngineered)
         x, y = self.engineer.finalDf(dfEngineered)
-
-        print(x.columns)
-        print(x.iloc[0:38, 10:20])
-        print(y)
+        return x,y
 
     #splits the dataframe into training (80%) and testing (20%)
-    def split(self, df):
-        split = 0.2
-        splitIndex = int(len(df) * (1-split))
-
-        xTrain = df.iloc[:splitIndex]
-        yTrain = df.iloc[:splitIndex]
-        xTest = df.iloc[splitIndex:]
-        yTest = df.iloc[splitIndex:]
+    def split(self, x, y):
+        change = 4
+        train_indices = []
+        test_indices = []
+        
+        for i in range(len(x)):
+            if (i + 1) % change == 0:  # Every 4th game (1-indexed)
+                test_indices.append(i)
+            else:
+                train_indices.append(i)
+        
+        xTrain = x.iloc[train_indices]
+        yTrain = y.iloc[train_indices]
+        xTest = x.iloc[test_indices]
+        yTest = y.iloc[test_indices]
 
         return xTrain, yTrain, xTest, yTest
 
-
-p = MLPipeline("FWD", "2024-25")
-df = p.retrieveData("2024-25")
-df = df[df["element"] == 4]
-p.preprocessData(df)
 
     
 
