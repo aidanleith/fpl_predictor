@@ -17,6 +17,7 @@ class dataCollector:
     #list of a specific players performance for each gameweek in a season
     def playerPerformanceGameweek(self, season, name):
         url = self.configs.dataSource.getPlayerUrl(season, name)
+        print(f"Trying to read CSV from: {url}")
         df = pd.read_csv(url)
         return df
     

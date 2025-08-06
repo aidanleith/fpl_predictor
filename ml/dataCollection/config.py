@@ -25,7 +25,7 @@ class dataSourceConfig:
     
     #retrieve list of all players stats for entire season
     def getCleanedPlayersUrl(self, season):
-        return f"{self.getSeasonUrl(season)}/cleaned_players.csv"
+        return f"{self.getSeasonUrl(season)}/players_raw.csv"
     
     #retrieve list of a specific players performance for each gameweek for a specific season
     def getPlayerUrl(self, season, name):
