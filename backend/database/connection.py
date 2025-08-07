@@ -7,8 +7,8 @@ Class to establish a connection pool for api use.
 '''
 class connection:
     
-    #class variable shared across all instances
-    '''pool = None
+    #class variable shared across all instances, singleton
+    pool = None
     
     def __init__(self):
         self.config = dbConnect()
@@ -118,5 +118,5 @@ class connection:
             if cursor:
                 cursor.close()
             if conn:
-                conn.close()'''
+                conn.close()
     
