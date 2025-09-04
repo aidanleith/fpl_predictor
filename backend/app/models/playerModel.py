@@ -1,5 +1,5 @@
 from pydantic import BaseModel
-from typing import List
+from typing import List, Optional
 
 '''individual player data returned from search'''
 class playerSearchResult(BaseModel):
@@ -30,10 +30,11 @@ class playerProfile(BaseModel):
     all_seasons: List[str]
 
 '''Individual players end of season stats, also contains basic player info.'''
+#had to add optional as server was returning 500 error code due to dob and order being null, however originally were required types (ex:john egan)
 class playerEndOfSeason(BaseModel):
     first_name: str
     last_name: str
-    dob: str
+    dob: Optional[str] = None
     season: str
     fpl_season_id: int
     position: str
@@ -44,7 +45,7 @@ class playerEndOfSeason(BaseModel):
     minutes: int
     own_goals: int
     penalties_missed: int
-    penalties_order: float
+    penalties_order: Optional[float] = None
     penalties_saved: int
     points_per_game: float
     points_per_game_rank: int

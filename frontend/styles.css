@@ -1,0 +1,501 @@
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body{
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    letter-spacing: 0.1em;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    min-height: 100vh;
+    margin: 0;
+}
+
+.nav-bar{
+    background: linear-gradient(90deg, #0D1B2A, #1B263B);
+    box-shadow: 0 10px 4px rgba(0,0,0,.06);
+    
+}
+
+.nav-bar-container{
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 0 16px;
+    height: 100px;               /* navbar height */
+    display: flex;  
+    align-items: center;    /*vertically aligns ul object*/
+}
+
+
+.nav-links{
+    list-style: none;
+    display: flex;
+    width: 100%;    /*important: lets space-evenly use the full width */
+    justify-content: space-evenly;  /*spaces out all child list items evenly horizontally*/
+    gap: 16px;   
+}
+
+/*a is its own entity within each li, so must make display inline block to perform transition and transformations*/
+.nav-links li a{
+    text-decoration: none;
+    color: white;
+    display: inline-block;
+    transition: transform 0.3s ease-in-out;
+}
+
+.nav-links li a:hover{
+    color: #667eea;
+    transform: scale(1.1);
+
+}
+
+.search-container{
+    width: 100%;
+    display:flex;
+    flex-direction: column;
+    margin-top: 150px;
+    align-items: center;
+    justify-content: center;
+}
+
+.search-heading{
+    margin: 20px;
+    text-align: center;
+    color:white;
+}
+
+.search-bar{
+    width: 50%;
+    border:none;
+    border-radius: 50px ;
+    padding: 5px;
+    font-size: 1.2em;
+    text-align: center;
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+    transition: all 0.3s ease;
+
+}
+
+.search-bar:hover {
+    transform: translateY(-2px);
+}
+
+/*when search bar is selected, moves slightly*/
+.search-bar:focus {
+    transform: translateY(-2px);
+}
+
+/*when in search bar, sets placeholder text invisible*/
+.search-bar:focus::placeholder{
+    color:transparent;
+}
+
+/***************about.html file specific*****************/
+#about-header{
+    text-align: center;
+    padding: 20px;
+    color: white;
+}
+
+#about-p-container{
+    width:80%;
+    margin: 20px auto; /*need to do this so it is centered on page, otherwise 80% comes in from right side and stays to left*/
+    border: 3px solid white;
+    border-radius: 50px;
+}
+
+#about-paragraph{
+    color: white;
+    line-height: 40px;
+    padding: 20px;
+}
+
+/********************Player search results page styles**************************/
+.player-result{
+    margin: 20px;
+    color: white;
+}
+
+/* Add spacing after results header */
+.results-header {
+    margin-bottom: 25px;
+    text-align: center;
+}
+
+.results-header h2 {
+    color: white;
+}
+
+.player-row {
+    display: flex;
+    align-items: center;
+    padding: 15px 20px;
+    margin-bottom: 10px;
+    background: rgba(255, 255, 255, 0.1);
+    border-radius: 8px;
+    backdrop-filter: blur(10px);
+    transition: background 0.2s ease;
+}
+
+.player-row:hover {
+    background: rgba(255, 255, 255, 0.15);
+}
+
+.player-name-link {
+    color: #a8d8ea;
+    cursor: pointer;
+    font-weight: bold;
+    width: 30%;  /* Reduced width */
+    transition: color 0.2s ease;
+}
+
+.player-name-link:hover {
+    color: white;
+    text-decoration: underline;
+}
+
+.player-team {
+    color: white;
+    width: 40%;  /* Increased width for better centering */
+    text-align: center;
+}
+
+.player-position {
+    color: #ccc;
+    width: 30%;  /* Increased width */
+    text-align: right;
+}
+
+/********************Player profile page styles**************************/
+#player-profile {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 20px;
+    animation: fadeIn 0.6s ease-in;
+}
+
+/*back button*/
+.back-button {
+    background: rgba(255, 255, 255, 0.1);
+    color: white;
+    border: 2px solid rgba(255, 255, 255, 0.3);
+    padding: 10px 20px;
+    border-radius: 25px;
+    cursor: pointer;
+    margin-bottom: 30px;
+    backdrop-filter: blur(10px);
+    transition: all 0.3s ease;
+    font-size: 0.9em;
+}
+
+.back-button:hover {
+    background: rgba(255, 255, 255, 0.2);
+    transform: translateY(-2px);
+}
+
+/*profile header */
+.prof-header {
+    text-align: center;
+    color: white;
+    padding: 40px 20px;
+    background: rgba(255, 255, 255, 0.1);
+    border-radius: 20px;
+    backdrop-filter: blur(15px);
+    margin-bottom: 30px;
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+}
+
+.prof-header h2 {
+    font-size: 2.5em;
+    margin-bottom: 15px;
+    background: linear-gradient(45deg, #a8d8ea, #aa96da);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+}
+
+.prof-header p {
+    font-size: 1.1em;
+    opacity: 0.9;
+    max-width: 600px;
+    margin: 0 auto;
+    line-height: 1.6;
+}
+
+/* Profile body - card layout */
+.prof-body {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 25px;
+    margin-bottom: 40px;
+}
+
+/* Info cards */
+.info-card {
+    background: rgba(255, 255, 255, 0.1);
+    border-radius: 15px;
+    padding: 30px;
+    backdrop-filter: blur(15px);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    transition: all 0.3s ease;
+    text-align: center;
+}
+
+.info-card:hover {
+    transform: translateY(-5px);
+    background: rgba(255, 255, 255, 0.15);
+    box-shadow: 0 15px 35px rgba(0, 0, 0, 0.1);
+}
+
+.info-card h3 {
+    color: #a8d8ea;
+    font-size: 1.3em;
+    margin-bottom: 15px;
+    font-weight: 600;
+}
+
+.info-card p {
+    color: white;
+    font-size: 1.1em;
+    margin: 10px 0;
+    line-height: 1.5;
+}
+
+.info-card .highlight {
+    color: white;
+    font-weight: bold;
+    font-size: 1.2em;
+}
+
+/* Season selector section */
+.season-selector {
+    background: rgba(255, 255, 255, 0.1);
+    border-radius: 15px;
+    padding: 30px;
+    backdrop-filter: blur(15px);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    text-align: center;
+    margin-bottom: 30px;
+}
+
+.season-selector h3 {
+    color: #a8d8ea;
+    margin-bottom: 20px;
+    font-size: 1.4em;
+}
+
+.dropdown-container {
+    position: relative;
+    display: inline-block;
+    margin-bottom: 15px;
+}
+
+.season-dropdown {
+    background: rgba(255, 255, 255, 0.1);
+    color: white;
+    border: 2px solid rgba(255, 255, 255, 0.3);
+    padding: 12px 40px 12px 20px;
+    border-radius: 25px;
+    font-size: 1em;
+    cursor: pointer;
+    backdrop-filter: blur(10px);
+    transition: all 0.3s ease;
+    appearance: none;
+    min-width: 200px;
+}
+
+.season-dropdown:hover {
+    background: rgba(255, 255, 255, 0.2);
+    border-color: rgba(255, 255, 255, 0.5);
+}
+
+.season-dropdown option {
+    background: #1B263B;
+    color: white;
+}
+
+/* Dropdown arrow */
+.dropdown-container::after {
+    content: '▼';
+    position: absolute;
+    right: 15px;
+    top: 50%;
+    transform: translateY(-50%);
+    color: white;
+    pointer-events: none;
+    font-size: 0.8em;
+}
+
+/* Placeholder stats section */
+.stats-preview {
+    background: rgba(255, 255, 255, 0.1);
+    border-radius: 15px;
+    padding: 30px;
+    backdrop-filter: blur(15px);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    text-align: center;
+}
+
+.stats-preview h3 {
+    color: #a8d8ea;
+    margin-bottom: 20px;
+    font-size: 1.4em;
+}
+
+.stats-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+    gap: 20px;
+    margin-top: 25px;
+}
+
+.stat-item {
+    background: rgba(255, 255, 255, 0.05);
+    border-radius: 10px;
+    padding: 20px 15px;
+    transition: all 0.3s ease;
+}
+
+.stat-item:hover {
+    background: rgba(255, 255, 255, 0.1);
+    transform: scale(1.05);
+}
+
+.stat-value {
+    display: block;
+    font-size: 1.8em;
+    font-weight: bold;
+    color: #aa96da;
+    margin-bottom: 5px;
+}
+
+.stat-label {
+    font-size: 0.9em;
+    color: rgba(255, 255, 255, 0.8);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+/* Coming soon message */
+.coming-soon {
+    background: rgba(255, 255, 255, 0.05);
+    border: 2px dashed rgba(255, 255, 255, 0.3);
+    border-radius: 15px;
+    padding: 40px;
+    text-align: center;
+    margin-top: 30px;
+}
+
+.coming-soon h4 {
+    color: #a8d8ea;
+    margin-bottom: 15px;
+    font-size: 1.2em;
+}
+
+.coming-soon p {
+    color: rgba(255, 255, 255, 0.7);
+    line-height: 1.6;
+}
+
+/********************Player season page styles**************************/
+
+#player-season-page {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 20px;
+    animation: fadeIn 0.6s ease-in;
+}
+
+.season-header {
+    text-align: center;
+    color: white;
+    padding: 40px 20px;
+    background: rgba(255, 255, 255, 0.1);
+    border-radius: 20px;
+    backdrop-filter: blur(15px);
+    margin-bottom: 30px;
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+}
+
+.season-header h2 {
+    font-size: 2.5em;
+    margin-bottom: 15px;
+    background: linear-gradient(45deg, #a8d8ea, #aa96da);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+}
+
+.season-header p {
+    font-size: 1.1em;
+    opacity: 0.9;
+    max-width: 600px;
+    margin: 0 auto;
+    line-height: 1.6;
+}
+
+.eos-table-container{
+    border-radius: 20px;
+    border: 2px solid rgba(255, 255, 255, 0.1);
+    max-height: 500px;
+    width: 100%;
+    padding: 10px;
+    text-align:center;
+    background: rgba(255, 255, 255, 0.1);
+    overflow:auto;
+    backdrop-filter: blur(15px);
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+}
+
+.eos-table table{
+    border-collapse: separate;
+    border-spacing: 0;
+}
+
+.eos-table th, td{
+    border-bottom: 2px solid rgba(255, 255, 255, 0.3);
+    border-right: 2px solid rgba(255, 255, 255, 0.3);
+    min-width: 100px;
+}
+
+.eos-table td{
+    padding:50px;
+}
+
+.eos-table tr:last-child td{
+    border-bottom: none;
+}
+
+.eos-table th:nth-child(36),
+.eos-table td:nth-child(36){
+    border-right: none;
+}
+
+/* Scrollbar styling */
+.eos-table-container::-webkit-scrollbar {
+    height: 8px;
+    width: 8px;
+}
+
+.eos-table-container::-webkit-scrollbar-track {
+    background: rgba(255, 255, 255, 0.1);
+    border-radius: 4px;
+}
+
+.eos-table-container::-webkit-scrollbar-thumb {
+    background: rgba(255, 255, 255, 0.3);
+    border-radius: 4px;
+}
+
+.eos-table-container::-webkit-scrollbar-thumb:hover {
+    background: rgba(255, 255, 255, 0.5);
+}
+
+.gw-header{
+    text-align:center;
+    color:white;
+    padding:40px 20px;
+}
+
+

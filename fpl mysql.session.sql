@@ -1,0 +1,1 @@
+SELECT * FROM gameweekStats WHERE player_id=1113 AND season="2023-24";
