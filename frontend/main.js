@@ -1,4 +1,5 @@
 let inPlayerSearchResView = false
+const API_BASE_URL = window.location.origin;
 
 //get html element
 const searchObject = document.querySelector('.search-bar')
@@ -21,7 +22,7 @@ function eventSearch(e){
 async function fetchMatchingNames(query){
     //use ?= to adhere to REST query parameter design principles
     // this endpoint is query as it returns a subset or list of matching players, not specific identifier
-    apiURL = `http://localhost:8000/search?name=${encodeURIComponent(query)}` //encode name so that url does not break w special chars
+    apiURL = `${API_BASE_URL}/search?name=${encodeURIComponent(query)}` //encode name so that url does not break w special chars
     try{
         response = await fetch(apiURL)
         if (response.ok){
@@ -109,7 +110,7 @@ function playerSearchResultsView(query){
 
 //player profile page function
 async function goToPlayerPage(id){
-    url = `http://localhost:8000/profile/${id}`
+    url = `${API_BASE_URL}/profile/${id}`
 
     try{
         response = await fetch(url)
@@ -235,7 +236,7 @@ function playerProfilePage(data, id){
 }
 
 async function seasonData(id, season){
-    url = `http://localhost:8000/profile/${id}/${season}`
+    url = `${API_BASE_URL}/profile/${id}/${season}`
     try{
         response = await fetch(url)
         if (response.ok){
