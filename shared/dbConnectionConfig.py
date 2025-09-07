@@ -6,8 +6,8 @@ load_dotenv()
 class dbConnect:
 
     def __init__(self):
-        self.host = os.getenv('DB_HOST')
-        self.port = int(os.getenv('DB_PORT'))
-        self.database = os.getenv('DB_DATABASE')
-        self.username = os.getenv('DB_USERNAME')
-        self.password = os.getenv('DB_PASSWORD')
+        self.host = os.getenv('MYSQLHOST')
+        self.port = int(os.getenv('MYSQLPORT', 3306))  # Default port if not set
+        self.database = os.getenv('MYSQL_DATABASE')
+        self.username = os.getenv('MYSQLUSER')
+        self.password = os.getenv('MYSQLPASSWORD')

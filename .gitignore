@@ -13,3 +13,6 @@ venv/
 
 #To do list
 .nextSteps.txt
+
+#Database
+fpl_backup.sql
